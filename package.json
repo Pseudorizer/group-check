@@ -38,6 +38,7 @@
     "unplugin-auto-import": "^0.16.6",
     "vite": "^4.4.9",
     "vite-plugin-dynamic-import": "^1.5.0",
-    "vite-plugin-mkcert": "^1.16.0"
+    "vite-plugin-mkcert": "^1.16.0",
+    "vite-plugin-webfont-dl": "^3.7.6"
   }
 }
