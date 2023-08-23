@@ -8,6 +8,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:import/typescript',
     'prettier',
+    './.eslintrc-auto-import.json',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
@@ -17,6 +18,10 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    '@typescript-eslint/consistent-type-imports': ['error', {
+      fixStyle: 'inline-type-imports',
+      prefer: 'type-imports'
+    }]
   },
   settings: {
     'import/parsers': {
