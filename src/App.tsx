@@ -1,5 +1,5 @@
 import { cn, makeDayKey, range } from '@/lib/utils.ts';
-import { MouseDownContext } from '@/context/MouseDownContext.tsx';
+import { MouseDownContext } from '@/contexts/MouseDownContext.tsx';
 
 // The ranges themselves will be generated from the range data - start, end, step
 // A users time selection will be stored as an array of ids
@@ -141,20 +141,23 @@ const App = ({ timeRange, days, selections }: Props) => {
 
   return (
     <div className={cn('flex flex-col gap-2')}>
-      <div className={cn('flex select-none gap-2')}>
+      <div className={cn('flex select-none gap-1')}>
         {days.map((day) => (
-          <div key={day.getTime()} className={cn('flex flex-col gap-2')}>
-            <div>{day.toLocaleDateString()}</div>
+          <div
+            key={day.getTime()}
+            className={cn('flex flex-col items-center gap-1.5')}
+          >
+            <div className={cn('text-sm')}>{day.toLocaleDateString()}</div>
             {hours.map((hour) => {
               const dayKey = makeDayKey(day);
               const isHighlighted = highlighted[dayKey]?.includes(hour.id);
               const mappedSelection = mappedSelections[dayKey]?.[hour.id];
 
               return (
-                <div
+                <button
                   className={cn(
-                    'select-none',
-                    isHighlighted ? 'text-red-500' : null,
+                    'hover: select-none rounded-lg border-2 p-2 text-zinc-400 hover:cursor-pointer hover:bg-zinc-700',
+                    isHighlighted ? 'bg-zinc-800 text-zinc-100' : null,
                     mappedSelection ? 'text-green-500' : null,
                   )}
                   key={`${dayKey}:${hour.id}`}
@@ -163,7 +166,7 @@ const App = ({ timeRange, days, selections }: Props) => {
                   title={mappedSelection?.users.join(', ') ?? ''}
                 >
                   {hour.time}
-                </div>
+                </button>
               );
             })}
           </div>
