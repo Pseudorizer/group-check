@@ -16,13 +16,17 @@ type TimeRange = {
   step: number;
 };
 
+type Highlighted = {
+  [day: number]: number[];
+};
+
 type Props = {
   timeRange: TimeRange;
   days: Date[];
 };
 
 const App = ({ timeRange, days }: Props) => {
-  const [highlighted, setHighlighted] = useState<number[]>([]);
+  const [highlighted, setHighlighted] = useState<Highlighted>({});
   const [currentOperation, setCurrentOperation] =
     useState<CurrentOperation | null>(null);
   const isMouseDown = useContext(MouseDownContext);
@@ -47,12 +51,15 @@ const App = ({ timeRange, days }: Props) => {
     });
   }, [timeRange]);
 
-  const handleTimeSelected = (id: number) => {
+  const handleTimeSelected = (day: number, hour: number) => {
     if (
-      highlighted.includes(id) &&
+      highlighted[day]?.includes(hour) &&
       (!currentOperation || currentOperation === CurrentOperation.removing)
     ) {
-      setHighlighted((prev) => prev.filter((v) => v !== id));
+      setHighlighted((prev) => ({
+        ...prev,
+        [day]: prev[day].filter((h) => h !== hour),
+      }));
 
       if (currentOperation === null) {
         setCurrentOperation(CurrentOperation.removing);
@@ -61,7 +68,10 @@ const App = ({ timeRange, days }: Props) => {
       !currentOperation ||
       currentOperation === CurrentOperation.adding
     ) {
-      setHighlighted((prev) => [...prev, id]);
+      setHighlighted((prev) => ({
+        ...prev,
+        [day]: [...(prev[day] ?? []), hour],
+      }));
 
       if (currentOperation === null) {
         setCurrentOperation(CurrentOperation.adding);
@@ -69,14 +79,14 @@ const App = ({ timeRange, days }: Props) => {
     }
   };
 
-  const handleMouseEnter = (id: number) => {
+  const handleMouseEnter = (day: number, hour: number) => {
     if (isMouseDown) {
-      handleTimeSelected(id);
+      handleTimeSelected(day, hour);
     }
   };
 
-  const handleMouseDown = (id: number) => {
-    handleTimeSelected(id);
+  const handleMouseDown = (day: number, hour: number) => {
+    handleTimeSelected(day, hour);
   };
 
   useEffect(() => {
@@ -86,18 +96,25 @@ const App = ({ timeRange, days }: Props) => {
   }, [isMouseDown]);
 
   return (
-    <div>
-      {hours.map((hour) => (
-        <div
-          className={cn(
-            'select-none',
-            highlighted.includes(hour.id) ? 'text-red-500' : null,
-          )}
-          key={hour.id}
-          onMouseEnter={() => handleMouseEnter(hour.id)}
-          onMouseDown={() => handleMouseDown(hour.id)}
-        >
-          {hour.time}
+    <div className={cn('flex select-none gap-2')}>
+      {days.map((day) => (
+        <div key={day.getTime()} className={cn('flex flex-col gap-2')}>
+          <div>{day.toLocaleDateString()}</div>
+          {hours.map((hour) => (
+            <div
+              className={cn(
+                'select-none',
+                highlighted[day.getTime()]?.includes(hour.id)
+                  ? 'text-red-500'
+                  : null,
+              )}
+              key={`${day.getTime()}:${hour.id}`}
+              onMouseEnter={() => handleMouseEnter(day.getTime(), hour.id)}
+              onMouseDown={() => handleMouseDown(day.getTime(), hour.id)}
+            >
+              {hour.time}
+            </div>
+          ))}
         </div>
       ))}
     </div>
