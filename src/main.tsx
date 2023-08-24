@@ -21,6 +21,30 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           now.add(5, 'd').toDate(),
           now.add(6, 'd').toDate(),
         ]}
+        selections={[
+          {
+            id: 1,
+            user: 'Emily',
+            times: {
+              '2023-7-24': [6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+              '2023-7-25': [1, 7, 13, 14, 15],
+            },
+          },
+          {
+            id: 1,
+            user: 'Char',
+            times: {
+              '2023-7-24': [6, 7, 13, 14, 15],
+            },
+          },
+          {
+            id: 1,
+            user: 'Josh',
+            times: {
+              '2023-7-24': [12, 13, 14, 15],
+            },
+          },
+        ]}
       />
     </MouseDownProvider>
   </React.StrictMode>,

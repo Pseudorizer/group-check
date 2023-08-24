@@ -11,3 +11,7 @@ export const range = (start: number, stop: number, step = 1) => {
     (_, i) => start + i * step,
   );
 };
+
+export const makeDayKey = (date: Date) => {
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+};

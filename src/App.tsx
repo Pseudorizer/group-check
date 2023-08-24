@@ -1,4 +1,4 @@
-import { cn, range } from '@/lib/utils.ts';
+import { cn, makeDayKey, range } from '@/lib/utils.ts';
 import { MouseDownContext } from '@/context/MouseDownContext.tsx';
 
 // The ranges themselves will be generated from the range data - start, end, step
@@ -13,19 +13,35 @@ enum CurrentOperation {
 type TimeRange = {
   start: number;
   end: number;
+  // Step can be a max of 30
   step: number;
 };
 
+type MappedUserSelections = {
+  [date: string]: {
+    [time: number]: {
+      users: string[];
+    };
+  };
+};
+
 type Highlighted = {
-  [day: number]: number[];
+  [date: string]: number[];
+};
+
+type UserSelection = {
+  id: number;
+  user: string;
+  times: Highlighted;
 };
 
 type Props = {
   timeRange: TimeRange;
   days: Date[];
+  selections: UserSelection[];
 };
 
-const App = ({ timeRange, days }: Props) => {
+const App = ({ timeRange, days, selections }: Props) => {
   const [highlighted, setHighlighted] = useState<Highlighted>({});
   const [currentOperation, setCurrentOperation] =
     useState<CurrentOperation | null>(null);
@@ -51,14 +67,14 @@ const App = ({ timeRange, days }: Props) => {
     });
   }, [timeRange]);
 
-  const handleTimeSelected = (day: number, hour: number) => {
+  const handleTimeSelected = (date: string, hour: number) => {
     if (
-      highlighted[day]?.includes(hour) &&
+      highlighted[date]?.includes(hour) &&
       (!currentOperation || currentOperation === CurrentOperation.removing)
     ) {
       setHighlighted((prev) => ({
         ...prev,
-        [day]: prev[day].filter((h) => h !== hour),
+        [date]: prev[date].filter((h) => h !== hour),
       }));
 
       if (currentOperation === null) {
@@ -70,7 +86,7 @@ const App = ({ timeRange, days }: Props) => {
     ) {
       setHighlighted((prev) => ({
         ...prev,
-        [day]: [...(prev[day] ?? []), hour],
+        [date]: [...(prev[date] ?? []), hour],
       }));
 
       if (currentOperation === null) {
@@ -79,14 +95,14 @@ const App = ({ timeRange, days }: Props) => {
     }
   };
 
-  const handleMouseEnter = (day: number, hour: number) => {
+  const handleMouseEnter = (date: string, hour: number) => {
     if (isMouseDown) {
-      handleTimeSelected(day, hour);
+      handleTimeSelected(date, hour);
     }
   };
 
-  const handleMouseDown = (day: number, hour: number) => {
-    handleTimeSelected(day, hour);
+  const handleMouseDown = (date: string, hour: number) => {
+    handleTimeSelected(date, hour);
   };
 
   useEffect(() => {
@@ -95,28 +111,67 @@ const App = ({ timeRange, days }: Props) => {
     }
   }, [isMouseDown]);
 
+  const mappedSelections = useMemo(() => {
+    return selections.reduce((userHighlights, selection) => {
+      Object.entries(selection.times).forEach(([date, hours]) => {
+        hours.forEach((hour) => {
+          if (userHighlights[date]) {
+            if (userHighlights[date][hour]) {
+              userHighlights[date][hour].users.push(selection.user);
+            } else {
+              userHighlights[date][hour] = {
+                users: [selection.user],
+              };
+            }
+          } else {
+            userHighlights[date] = {
+              [hour]: {
+                users: [selection.user],
+              },
+            };
+          }
+        });
+      });
+
+      return userHighlights;
+    }, {} as MappedUserSelections);
+  }, [selections]);
+
+  console.debug(mappedSelections);
+
   return (
-    <div className={cn('flex select-none gap-2')}>
-      {days.map((day) => (
-        <div key={day.getTime()} className={cn('flex flex-col gap-2')}>
-          <div>{day.toLocaleDateString()}</div>
-          {hours.map((hour) => (
-            <div
-              className={cn(
-                'select-none',
-                highlighted[day.getTime()]?.includes(hour.id)
-                  ? 'text-red-500'
-                  : null,
-              )}
-              key={`${day.getTime()}:${hour.id}`}
-              onMouseEnter={() => handleMouseEnter(day.getTime(), hour.id)}
-              onMouseDown={() => handleMouseDown(day.getTime(), hour.id)}
-            >
-              {hour.time}
-            </div>
-          ))}
-        </div>
-      ))}
+    <div className={cn('flex flex-col gap-2')}>
+      <div className={cn('flex select-none gap-2')}>
+        {days.map((day) => (
+          <div key={day.getTime()} className={cn('flex flex-col gap-2')}>
+            <div>{day.toLocaleDateString()}</div>
+            {hours.map((hour) => {
+              const dayKey = makeDayKey(day);
+              const isHighlighted = highlighted[dayKey]?.includes(hour.id);
+              const mappedSelection = mappedSelections[dayKey]?.[hour.id];
+
+              return (
+                <div
+                  className={cn(
+                    'select-none',
+                    isHighlighted ? 'text-red-500' : null,
+                    mappedSelection ? 'text-green-500' : null,
+                  )}
+                  key={`${dayKey}:${hour.id}`}
+                  onMouseEnter={() => handleMouseEnter(dayKey, hour.id)}
+                  onMouseDown={() => handleMouseDown(dayKey, hour.id)}
+                  title={mappedSelection?.users.join(', ') ?? ''}
+                >
+                  {hour.time}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      <div>
+        <button>Submit</button>
+      </div>
     </div>
   );
 };
