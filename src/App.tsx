@@ -1,5 +1,5 @@
-import { cn, range } from './utils.ts';
-import { MouseDownContext } from './context/MouseDownContext.tsx';
+import { cn, range } from '@/lib/utils.ts';
+import { MouseDownContext } from '@/context/MouseDownContext.tsx';
 
 // The ranges themselves will be generated from the range data - start, end, step
 // A users time selection will be stored as an array of ids
@@ -18,9 +18,10 @@ type TimeRange = {
 
 type Props = {
   timeRange: TimeRange;
+  days: Date[];
 };
 
-const App = ({ timeRange }: Props) => {
+const App = ({ timeRange, days }: Props) => {
   const [highlighted, setHighlighted] = useState<number[]>([]);
   const [currentOperation, setCurrentOperation] =
     useState<CurrentOperation | null>(null);

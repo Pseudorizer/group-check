@@ -5,6 +5,7 @@ import legacy from '@vitejs/plugin-legacy';
 import dynamicImport from 'vite-plugin-dynamic-import';
 import AutoImport from 'unplugin-auto-import/vite';
 import webfontDownload from 'vite-plugin-webfont-dl';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   server: {
@@ -14,6 +15,7 @@ export default defineConfig({
   plugins: [
     react(),
     legacy(),
+    tsconfigPaths(),
     dynamicImport(),
     webfontDownload([
       'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap',

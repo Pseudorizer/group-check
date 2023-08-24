@@ -7,7 +7,7 @@ import { MouseDownProvider } from './context/MouseDownContext.tsx';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <MouseDownProvider>
-      <App timeRange={{ start: 6, end: 19, step: 60 }} />
+      <App timeRange={{ start: 6, end: 19, step: 60 }} days={[new Date()]} />
     </MouseDownProvider>
   </React.StrictMode>,
 );

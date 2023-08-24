@@ -28,6 +28,11 @@ module.exports = {
       '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
     'import/resolver': {
+      'eslint-import-resolver-custom-alias': {
+        alias: {
+          '@': './src'
+        }
+      },
       typescript: true,
       node: true,
     },
